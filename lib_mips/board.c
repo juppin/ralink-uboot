@@ -763,6 +763,15 @@ void board_init_f(ulong bootflag)
 	 */
 	addr = CFG_SDRAM_BASE + gd->ram_size;
 
+	/*
+	 * FIXME: Do not use remap zone. Because mips just direct map
+	 * low 512MB address. But SDRAM space be splited two zones.
+	 */
+#if defined(MT7621_ASIC_BOARD)
+	if (gd->ram_size > 0x1BFFFFFF)
+		addr = CFG_SDRAM_BASE + 0x1BFFFFFF;
+#endif
+
 	/* We can reserve some RAM "on top" here.
 	 */
 #ifdef DEBUG	    

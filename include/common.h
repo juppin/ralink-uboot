@@ -217,7 +217,7 @@ int	serial_buffered_tstc (void);
 void	hang		(void) __attribute__ ((noreturn));
 
 /* */
-long int initdram (int);
+unsigned long initdram (int);
 int	display_options (void);
 void	print_size (ulong, const char *);
 

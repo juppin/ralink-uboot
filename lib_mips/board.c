@@ -846,7 +846,7 @@ void board_init_f(ulong bootflag)
 	/*
 	 * Save local variables to board info struct
 	 */
-	bd->bi_memstart	= CFG_SDRAM_BASE;	/* start of  DRAM memory */
+	bd->bi_memstart	= CFG_SDRAM_BASE - 0x80000000;	/* start of  DRAM memory */
 	bd->bi_memsize	= gd->ram_size;		/* size  of  DRAM memory in bytes */
 	bd->bi_baudrate	= gd->baudrate;		/* Console Baudrate */
 

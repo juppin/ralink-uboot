@@ -191,12 +191,11 @@ void do_bootm_linux (cmd_tbl_t * cmdtp, int flag, int argc, char *argv[],
 	printf ("## Giving linux memsize in bytes, %lu\n", gd->bd->bi_memsize);
 #endif
 #else
-	sprintf (env_buf, "%lu", gd->bd->bi_memsize >> 20);
+	sprintf (env_buf, "%luM", gd->bd->bi_memsize >> 20);
 #ifdef DEBUG
 	printf ("## Giving linux memsize in MB, %lu\n", gd->bd->bi_memsize >> 20);
 #endif
 #endif /* CONFIG_MEMSIZE_IN_BYTES */
-
 	linux_env_set ("ramsize", env_buf);
 
 	sprintf (env_buf, "%lu", gd->bd->bi_memstart);

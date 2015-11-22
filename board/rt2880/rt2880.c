@@ -80,8 +80,7 @@ unsigned long get_ram_size(volatile long *base, unsigned long maxsize)
 		addr = base + cnt;	/* pointer arith! */
 
 		val = *addr;
-		printf("retrieve addr=0x%08X \n",addr);
-		printf("retrieve val =0x%08X \n",val);
+
 		*addr = save[--i];
 		if (val != ~cnt) {
 			size = cnt * sizeof (long);

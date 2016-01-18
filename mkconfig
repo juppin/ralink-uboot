@@ -28,9 +28,9 @@ cd ./include
 #
 # Create link to architecture specific headers
 #
-rm -f asm
+rm -rf asm
 ln -s asm-$2 asm
-rm -f asm-$2/arch
+rm -rf asm-$2/arch
 ln -s arch-$3 asm-$2/arch
 
 if [ "$2" = "arm" ] ; then

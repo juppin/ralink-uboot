@@ -1,0 +1,16 @@
+*.o
+uboot.bin
+*.map
+*.srec
+.depend
+*.swp
+*.swo
+*.a
+.menuconfig.log
+.config.old
+.config
+
+include/asm
+include/asm-*
+include/config.mk
+autoconf.h

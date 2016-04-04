@@ -236,14 +236,15 @@ void usb_display_config(struct usb_device *dev)
 
 static inline char *portspeed(int speed)
 {
-    if (speed == USB_SPEED_HIGH)
-        return "480 Mb/s";
-    else if (speed == USB_SPEED_LOW)
-        return "1.5 Mb/s";
-    else
-        return "12 Mb/s";
+	if (speed == USB_SPEED_SUPER)
+		return "5 Gb/s";
+	else if (speed == USB_SPEED_HIGH)
+		return "480 Mb/s";
+	else if (speed == USB_SPEED_LOW)
+		return "1.5 Mb/s";
+	else
+		return "12 Mb/s";
 }
-
 
 /* shows the device tree recursively */
 void usb_show_tree_graph(struct usb_device *dev,char *pre)
@@ -321,6 +322,8 @@ void usb_show_tree(struct usb_device *dev)
 #ifdef CONFIG_USB_STORAGE
 int do_usbboot (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
+	DECLARE_GLOBAL_DATA_PTR;
+
 	char *boot_device = NULL;
 	char *ep;
 	int dev, part=1, rcode;
@@ -458,8 +461,7 @@ int do_usb (cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	block_dev_desc_t *stor_dev;
 #endif
 
-	if ((strncmp(argv[1], "reset", 5) == 0) ||
-		 (strncmp(argv[1], "start", 5) == 0)){
+	if ((strncmp(argv[1], "reset", 5) == 0) || (strncmp(argv[1], "start", 5) == 0)){
 		usb_stop();
 		printf("(Re)start USB...\n");
 		i = usb_init();

@@ -32,6 +32,9 @@
 #include "serial.h"
 #include <rt_mmap.h>
 
+#ifdef CONFIG_MIPS16
+#define cpu_to_le32(x) (x)
+#endif
 
 #if defined(RT6855A_ASIC_BOARD) || defined(RT6855A_FPGA_BOARD)
 static unsigned long uclk_20M[13]={ // 65000*(b*16*1)/2000000
@@ -73,7 +76,7 @@ void bbu_uart_init(void)
 	ra_outb(CR_UART_LCR, LCR_DLAB);
 
 	div_y = 65000;
-	div_x = uclk_20M[MT7621_UCLK_20M];
+	div_x = uclk_20M[1];
 	word = (div_x<<16)|div_y;
 	ra_outl(CR_UART_XYD, word);
 

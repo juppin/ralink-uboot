@@ -979,6 +979,8 @@ submit_control_msg(struct usb_device *udev, unsigned long pipe, void *buffer,
 	return xhci_ctrl_tx(udev, pipe, setup, length, buffer);
 }
 
+static int xhci_inited = 0;
+
 /**
  * Intialises the XHCI host controller
  * and allocates the necessary data structures
@@ -1006,6 +1008,8 @@ int usb_lowlevel_init(int index, enum usb_init_type init, void **controller)
 	ctrl->hccr = hccr;
 	ctrl->hcor = hcor;
 
+	xhci_inited = 1;
+
 	/*
 	 * Program the Number of Device Slots Enabled field in the CONFIG
 	 * register with the max value of slots the HC can handle.
@@ -1015,8 +1019,8 @@ int usb_lowlevel_init(int index, enum usb_init_type init, void **controller)
 	val |= (val2 & ~HCS_SLOTS_MASK);
 	xhci_writel(&hcor->or_config, val);
 
+	mtk_xhci_scheduler_init();
 
-        mtk_xhci_scheduler_init();
 	/* initializing xhci data structures */
 	if (xhci_mem_init(ctrl, hccr, hcor) < 0)
 		return -ENOMEM;
@@ -1025,7 +1029,7 @@ int usb_lowlevel_init(int index, enum usb_init_type init, void **controller)
 	descriptor.hub.bNbrPorts = ((reg & HCS_MAX_PORTS_MASK) >>
 						HCS_MAX_PORTS_SHIFT);
 	printf("Register %x NbrPorts %d\n", reg, descriptor.hub.bNbrPorts);
-	
+
 	enableXhciAllPortPower(hcor);
 
 	/* Port Indicators */
@@ -1047,11 +1051,9 @@ int usb_lowlevel_init(int index, enum usb_init_type init, void **controller)
 	xhci_writel(&ctrl->ir_set->irq_control, 0);
 	xhci_writel(&ctrl->ir_set->irq_pending, 0);
 
-
 	reg = HC_VERSION(xhci_readl(&hccr->cr_capbase));
 
 	*controller = &xhcic[index];
-
 
 	return 0;
 }
@@ -1065,8 +1067,11 @@ int usb_lowlevel_init(int index, enum usb_init_type init, void **controller)
  */
 int usb_lowlevel_stop(int index)
 {
-	struct xhci_ctrl *ctrl = (xhcic + index);
+	struct xhci_ctrl *ctrl = &xhcic[index];
 	u32 temp;
+
+	if (!xhci_inited)
+		return 0;
 
 	xhci_reset(ctrl->hcor);
 
@@ -1079,6 +1084,8 @@ int usb_lowlevel_stop(int index)
 	xhci_hcd_stop(index);
 
 	xhci_cleanup(ctrl);
+
+	xhci_inited = 0;
 
 	return 0;
 }

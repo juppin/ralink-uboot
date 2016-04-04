@@ -51,6 +51,7 @@
 #include <asm/addrspace.h>
 #include <asm/byteorder.h>
 
+#include <gpio.h>
 
 #define DD printf("### %s %d\n", __FUNCTION__, __LINE__);
 //#define DD
@@ -105,6 +106,7 @@ int usb_init(void)
 	int i, start_index = 0;
         struct usb_device *dev;
 
+	gpio_init_usb(1);
 
 	running=0;
 	dev_index=0;

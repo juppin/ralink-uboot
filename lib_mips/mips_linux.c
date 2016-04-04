@@ -185,22 +185,24 @@ void do_bootm_linux (cmd_tbl_t * cmdtp, int flag, int argc, char *argv[],
 
 	linux_params_init (UNCACHED_SDRAM (gd->bd->bi_boot_params), commandline);
 
+	len = gd->ram_size;
+#if defined (ON_BOARD_4096M_DRAM_COMPONENT)
+	len += 64*1024*1024;
+#endif
+
 #ifdef CONFIG_MEMSIZE_IN_BYTES
-	sprintf (env_buf, "%lu", gd->bd->bi_memsize);
+	sprintf (env_buf, "%lu", len);
 #ifdef DEBUG
-	printf ("## Giving linux memsize in bytes, %lu\n", gd->bd->bi_memsize);
+	printf ("## Giving linux memsize in bytes, %lu\n", len);
 #endif
 #else
-	sprintf (env_buf, "%luM", gd->bd->bi_memsize >> 20);
+	sprintf (env_buf, "%lu", len >> 20);
 #ifdef DEBUG
-	printf ("## Giving linux memsize in MB, %lu\n", gd->bd->bi_memsize >> 20);
+	printf ("## Giving linux memsize in MB, %lu\n", len >> 20);
 #endif
 #endif /* CONFIG_MEMSIZE_IN_BYTES */
-	linux_env_set ("ramsize", env_buf);
 
-	sprintf (env_buf, "%lu", gd->bd->bi_memstart);
-	linux_env_set ("rambase", env_buf);
-	printf ("## Giving linux memstart at, 0x%08x\n", gd->bd->bi_memstart);
+	linux_env_set ("memsize", env_buf);
 
 	sprintf (env_buf, "0x%08X", (uint) UNCACHED_SDRAM (initrd_start));
 	linux_env_set ("initrd_start", env_buf);

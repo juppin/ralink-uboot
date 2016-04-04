@@ -14,3 +14,4 @@ include/asm
 include/asm-*
 include/config.mk
 autoconf.h
+scripts/lxdialog/lxdialog

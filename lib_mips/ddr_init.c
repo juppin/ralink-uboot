@@ -146,7 +146,6 @@ int ddr_initialize(void)
 #include "ddr3.h"		
 	}		
 #endif	
-	return 0;
 }
 
 int mempll_init()

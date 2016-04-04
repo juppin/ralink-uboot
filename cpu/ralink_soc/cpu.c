@@ -21,13 +21,16 @@
  * MA 02111-1307 USA
  */
 
+#if defined (CONFIG_USB_XHCI)
 #include <asm-mips/mipsregs.h>
 #include <asm-mips/cacheops.h>
+#endif
 #include <common.h>
 #include <command.h>
 #include <asm/mipsregs.h>
 #include <rt_mmap.h>
 
+#if defined (CONFIG_USB_XHCI)
 #define cache_op(op,addr)						\
 	 __asm__ __volatile__(						\
 	"       .set    push                                    \n"	\
@@ -37,7 +40,7 @@
 	"       .set    pop                                     \n"	\
 	:								\
 	: "i" (op), "R" (*(unsigned char *)(addr)))
-
+#endif
 
 #if defined(RT6855A_FPGA_BOARD) || defined(RT6855A_ASIC_BOARD)
 int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
@@ -58,6 +61,7 @@ int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 }
 #endif
 
+#if defined (CONFIG_USB_XHCI)
 #ifdef CONFIG_SYS_CACHELINE_SIZE
 
 static inline unsigned long icache_line_size(void)
@@ -72,7 +76,7 @@ static inline unsigned long dcache_line_size(void)
 
 #else /* !CONFIG_SYS_CACHELINE_SIZE */
 
-static inline unsigned long icache_line_size(void)
+__attribute__((nomips16)) static inline unsigned long icache_line_size(void)
 {
 	unsigned long conf1, il;
 	conf1 = read_c0_config1();
@@ -82,7 +86,7 @@ static inline unsigned long icache_line_size(void)
 	return 2 << il;
 }
 
-static inline unsigned long dcache_line_size(void)
+__attribute__((nomips16)) static inline unsigned long dcache_line_size(void)
 {
 	unsigned long conf1, dl;
 	conf1 = read_c0_config1();
@@ -93,9 +97,11 @@ static inline unsigned long dcache_line_size(void)
 }
 
 #endif /* !CONFIG_SYS_CACHELINE_SIZE */
+#endif
 
-void flush_cache (ulong start_addr, ulong size)
+__attribute__((nomips16)) void flush_cache (ulong start_addr, ulong size)
 {
+#if defined (CONFIG_USB_XHCI)
 	unsigned long ilsize = icache_line_size();
 	unsigned long dlsize = dcache_line_size();
 	unsigned long addr, aend;
@@ -136,10 +142,11 @@ void flush_cache (ulong start_addr, ulong size)
 			break;
 		addr += ilsize;
 	}
+#endif
 }
 #ifdef RT2880_U_BOOT_CMD_OPEN
 
-void write_one_tlb( int index, u32 pagemask, u32 hi, u32 low0, u32 low1 ){
+__attribute__((nomips16)) void write_one_tlb( int index, u32 pagemask, u32 hi, u32 low0, u32 low1 ){
 	write_32bit_cp0_register(CP0_ENTRYLO0, low0);
 	write_32bit_cp0_register(CP0_PAGEMASK, pagemask);
 	write_32bit_cp0_register(CP0_ENTRYLO1, low1);
@@ -149,7 +156,8 @@ void write_one_tlb( int index, u32 pagemask, u32 hi, u32 low0, u32 low1 ){
 }
 #endif
 
-void flush_dcache_range(ulong start_addr, ulong stop)
+#if defined (CONFIG_USB_XHCI)
+__attribute__((nomips16)) void flush_dcache_range(ulong start_addr, ulong stop)
 {
 	unsigned long lsize = dcache_line_size();
 	unsigned long addr = start_addr & ~(lsize - 1);
@@ -163,7 +171,7 @@ void flush_dcache_range(ulong start_addr, ulong stop)
 	}
 }
 
-void invalidate_dcache_range(ulong start_addr, ulong stop)
+__attribute__((nomips16)) void invalidate_dcache_range(ulong start_addr, ulong stop)
 {
 	unsigned long lsize = dcache_line_size();
 	unsigned long addr = start_addr & ~(lsize - 1);
@@ -176,4 +184,4 @@ void invalidate_dcache_range(ulong start_addr, ulong stop)
 		addr += lsize;
 	}
 }
-
+#endif

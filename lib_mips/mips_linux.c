@@ -203,6 +203,11 @@ void do_bootm_linux (cmd_tbl_t * cmdtp, int flag, int argc, char *argv[],
 #endif /* CONFIG_MEMSIZE_IN_BYTES */
 
 	linux_env_set ("memsize", env_buf);
+	/* 
+	 * Also set 'ramsize' params,
+	 * because old linux code need it
+	 */
+	linux_env_set ("ramsize", env_buf);
 
 	sprintf (env_buf, "0x%08X", (uint) UNCACHED_SDRAM (initrd_start));
 	linux_env_set ("initrd_start", env_buf);

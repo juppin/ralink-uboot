@@ -397,7 +397,8 @@ struct nand_ecclayout {
 
 #define DBG_EVT_ALL			0xffffffff
 
-#define DBG_EVT_MASK      	(DBG_EVT_INIT)
+//#define DBG_EVT_MASK      	(DBG_EVT_INIT)
+#define DBG_EVT_MASK      	(DBG_EVT_ALL)
 
 #if __DEBUG_NAND
 #define MSG(evt, fmt, args...) \

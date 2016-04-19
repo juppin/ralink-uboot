@@ -53,6 +53,7 @@ endif
 endif
 endif
 
+OBJS	+= nand/mtk_nand.o nand/nand_base.o
 ifeq ($(CFG_ENV_IS), IN_NAND)
 ifeq ($(MT7621_MP), y)
 OBJS	+= nand/mtk_nand.o nand/nand_base.o

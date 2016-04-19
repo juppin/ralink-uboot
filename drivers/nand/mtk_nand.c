@@ -309,12 +309,32 @@ static void NFI_CLN_REG16(u32 reg, u16 value)
 #endif
 void nand_enable_clock(void)
 {
-    //enable_clock(MT65XX_PDN_PERI_NFI, "NAND");
+	u32 val;
+
+	/* assert Nand Control RST */
+	val = RALINK_REG(RALINK_SYSCTL_BASE + 0x34);    
+	val |= RALINK_NAND_RST;
+	RALINK_REG(RALINK_SYSCTL_BASE + 0x34) = val;
+	udelay(20);
+
+	val = val & ~(RALINK_NAND_RST);
+	RALINK_REG(RALINK_SYSCTL_BASE + 0x34) = val;
+
+
+	/* Enable Nand Clock */
+	val = RALINK_REG(RALINK_SYSCTL_BASE + 0x30);    
+	val |= (1 << 15);
+	RALINK_REG(RALINK_SYSCTL_BASE + 0x30) = val;
 }
 
 void nand_disable_clock(void)
 {
-    //disable_clock(MT65XX_PDN_PERI_NFI, "NAND");
+	u32 val;
+
+	/* Disable Nand Clock */
+	val = RALINK_REG(RALINK_SYSCTL_BASE + 0x30);    
+	val &= ~(1 << 15);
+	RALINK_REG(RALINK_SYSCTL_BASE + 0x30) = val;
 }
 
 static struct nand_ecclayout nand_oob_16 = {
@@ -993,9 +1013,11 @@ static bool mtk_nand_status_ready(u32 u4Status)
     u32 timeout = 0xFFFF;
     while ((DRV_Reg32(NFI_STA_REG32) & u4Status) != 0)
     {
+	udelay(2);
         timeout--;
         if (0 == timeout)
         {
+		MSG(INIT, "Wait for Ready timeout\n");
             return false;
         }
     }
@@ -1028,6 +1050,7 @@ static bool mtk_nand_reset(void)
         DRV_WriteReg16(NFI_CON_REG16, CON_FIFO_FLUSH | CON_NFI_RST);
         while (DRV_Reg16(NFI_MASTERSTA_REG16))
         {
+		udelay(2);
             timeout--;
             if (!timeout)
             {
@@ -3488,45 +3511,48 @@ static void mtk_nand_init_hw(struct mtk_nand_host *host)
 {
 	struct mtk_nand_host_hw *hw = host->hw;
 	u32 data;
-	
+
+	/*
+	 * Set GPIO_Group to NAND Mode
+	 */
 	data = 	DRV_Reg32(RALINK_SYSCTL_BASE+0x60);
 	data &= ~((0x3<<18)|(0x3<<16));
 	data |= ((0x2<<18) |(0x2<<16));
 	DRV_WriteReg32(RALINK_SYSCTL_BASE+0x60, data);
 
-    nand_enable_clock();
+	nand_enable_clock();
 
-    g_bInitDone = false;
-    g_kCMD.u4OOBRowAddr = (u32) - 1;
+	g_bInitDone = false;
+	g_kCMD.u4OOBRowAddr = (u32) - 1;
 
-    /* Set default NFI access timing control */
-    DRV_WriteReg32(NFI_ACCCON_REG32, hw->nfi_access_timing);
-    DRV_WriteReg16(NFI_CNFG_REG16, 0);
-    DRV_WriteReg16(NFI_PAGEFMT_REG16, 0);
+	/* Set default NFI access timing control */
+	DRV_WriteReg32(NFI_ACCCON_REG32, hw->nfi_access_timing);
+	DRV_WriteReg16(NFI_CNFG_REG16, 0);
+	DRV_WriteReg16(NFI_PAGEFMT_REG16, 0);
 
-    /* Reset the state machine and data FIFO, because flushing FIFO */
-    (void)mtk_nand_reset();
+	/* Reset the state machine and data FIFO, because flushing FIFO */
+	(void)mtk_nand_reset();
 
-    /* Set the ECC engine */
-    if (hw->nand_ecc_mode == NAND_ECC_HW)
-    {
-//        MSG(INIT, "%s : Use HW ECC\n", MODULE_NAME);
-        if (g_bHwEcc)
-        {
-            NFI_SET_REG32(NFI_CNFG_REG16, CNFG_HW_ECC_EN);
-        }
-        ECC_Config(host->hw,4);
-        mtk_nand_configure_fdm(8);
-        mtk_nand_configure_lock();
-    }
+	/* Set the ECC engine */
+	if (hw->nand_ecc_mode == NAND_ECC_HW)
+	{
+		//        MSG(INIT, "%s : Use HW ECC\n", MODULE_NAME);
+		if (g_bHwEcc)
+		{
+			NFI_SET_REG32(NFI_CNFG_REG16, CNFG_HW_ECC_EN);
+		}
+		ECC_Config(host->hw,4);
+		mtk_nand_configure_fdm(8);
+		mtk_nand_configure_lock();
+	}
 #if defined (__INTERNAL_USE_AHB_MODE__)
-    /* Initilize interrupt. Clear interrupt, read clear. */
-    DRV_Reg16(NFI_INTR_REG16);
+	/* Initilize interrupt. Clear interrupt, read clear. */
+	DRV_Reg16(NFI_INTR_REG16);
 
-    /* Interrupt arise when read data or program data to/from AHB is done. */
-    DRV_WriteReg16(NFI_INTR_EN_REG16, 0);
+	/* Interrupt arise when read data or program data to/from AHB is done. */
+	DRV_WriteReg16(NFI_INTR_EN_REG16, 0);
 #endif
-	
+
 	NFI_SET_REG16(NFI_IOCON_REG16, 0x47);
 
 }
@@ -3891,14 +3917,8 @@ int mtk_nand_probe()
     u32 ext_id;
     u8 ext_id1, ext_id2, ext_id3;
     int i;
+
 		
-	{	
-		u32 data;
-		data = 	DRV_Reg32(RALINK_SYSCTL_BASE+0x60);
-		data &= ~((0x3<<18)|(0x3<<16));
-		data |= ((0x2<<18) |(0x2<<16));
-		DRV_WriteReg32(RALINK_SYSCTL_BASE+0x60, data);
-	}	
 #if defined (__KERNEL_NAND__)
     hw = (struct mtk_nand_host_hw *)pdev->dev.platform_data;
 #else
@@ -4229,7 +4249,6 @@ int mtk_nand_probe()
     {
 //        MSG(INIT, "[mtk_nand] probe successfully!\n");
         MSG(INIT, "writesize=%d, oobsize=%d, erasesize=%d, iowidth=%d\n",mtd->writesize,mtd->oobsize, mtd->erasesize,devinfo.iowidth);
-        nand_disable_clock();
         return err;
     }
 

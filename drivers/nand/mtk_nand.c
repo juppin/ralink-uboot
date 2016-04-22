@@ -329,12 +329,7 @@ void nand_enable_clock(void)
 
 void nand_disable_clock(void)
 {
-	u32 val;
-
-	/* Disable Nand Clock */
-	val = RALINK_REG(RALINK_SYSCTL_BASE + 0x30);    
-	val &= ~(1 << 15);
-	RALINK_REG(RALINK_SYSCTL_BASE + 0x30) = val;
+	//disable_clock(MT65XX_PDN_PERI_NFI, "NAND");
 }
 
 static struct nand_ecclayout nand_oob_16 = {

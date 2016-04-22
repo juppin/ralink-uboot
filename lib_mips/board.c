@@ -1334,7 +1334,8 @@ static int check_uboot_image(ulong image_ptr, ulong image_size)
 		return -1;
 	}
 
-#if defined (UBOOT_RAM) && (defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI))
+#if 1
+//#if defined (UBOOT_RAM) && (defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI))
 	/* RAM mode Uboot */
 	if (ntohl(hdr->ih_magic) != IH_MAGIC) {
 		printf("Invalid U-Boot image %s!\n", "header");
@@ -1355,7 +1356,13 @@ static int flash_uboot_image(ulong image_ptr, ulong image_size)
 {
 	int rrc = 0;
 
-#if defined (CFG_ENV_IS_IN_NAND)
+#if 1
+	ulong size;
+	if ((size = mtk_nand_probe()) != (ulong)0) {
+		printf("nand probe fail\n");
+		while(1);
+	}
+//#if defined (CFG_ENV_IS_IN_NAND)
 	printf("\n Copy %d bytes to Flash... \n", image_size);
 	rrc = ranand_erase_write((char *)image_ptr, 0, image_size);
 #elif defined (CFG_ENV_IS_IN_SPI)
@@ -1514,7 +1521,8 @@ __attribute__((nomips16)) void board_init_r (gd_t *id, ulong dest_addr)
 	ulong e_end;
 #endif
 	ulong load_address;
-#if defined (UBOOT_RAM) && (defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI))
+#if 1
+//#if defined (UBOOT_RAM) && (defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI))
 	char *uboot_file = "uboot.img";
 #else
 	char *uboot_file = "uboot.bin";

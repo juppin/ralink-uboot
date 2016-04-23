@@ -3971,7 +3971,7 @@ int mtk_nand_probe()
 #if defined (ECC_ENABLE)
     hw->nand_ecc_mode = NAND_ECC_HW;
 #else
-	hw->nand_ecc_mode = NAND_ECC_NONE;
+    hw->nand_ecc_mode = NAND_ECC_NONE;
 #endif
 
     /* Set address of NAND IO lines */
@@ -5431,7 +5431,7 @@ int ralink_nand_command(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		addr = (unsigned int)simple_strtoul(argv[2], NULL, 16);
 		len = (int)simple_strtoul(argv[3], NULL, 16);
 		printf("force erase addr=%08X, len=%d\n",addr,len);
-		if (ranand_erase_raw(addr, len, 0) == -1)
+		if (ranand_erase_raw(addr, len, 1) == -1)
 			printf("erase failed\n");
 		else
 			printf("erase succeed\n");

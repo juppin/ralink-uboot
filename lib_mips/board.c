@@ -43,6 +43,7 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int modifies= 0;
 unsigned char BootType='3';
+unsigned char FlashType='0';
 
 #ifdef DEBUG
    #define DATE      "05/25/2006"
@@ -1334,8 +1335,7 @@ static int check_uboot_image(ulong image_ptr, ulong image_size)
 		return -1;
 	}
 
-#if 1
-//#if defined (UBOOT_RAM) && (defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI))
+#if defined (UBOOT_RAM) && (defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI))
 	/* RAM mode Uboot */
 	if (ntohl(hdr->ih_magic) != IH_MAGIC) {
 		printf("Invalid U-Boot image %s!\n", "header");
@@ -1343,7 +1343,7 @@ static int check_uboot_image(ulong image_ptr, ulong image_size)
 	}
 #else
 	/* ROM mode Uboot */
-	if (ntohl(hdr->ih_magic) == IH_MAGIC) {
+	if (FlashType == '2' && ntohl(hdr->ih_magic) == IH_MAGIC) {
 		printf("Invalid U-Boot image %s!\n", "(RAM mode)");
 		return -1;
 	}
@@ -1355,29 +1355,35 @@ static int check_uboot_image(ulong image_ptr, ulong image_size)
 static int flash_uboot_image(ulong image_ptr, ulong image_size)
 {
 	int rrc = 0;
-
-#if 1
 	ulong size;
-	if ((size = mtk_nand_probe()) != (ulong)0) {
-		printf("nand probe fail\n");
-		while(1);
-	}
 //#if defined (CFG_ENV_IS_IN_NAND)
-	printf("\n Copy %d bytes to Flash... \n", image_size);
-	rrc = ranand_erase_write((char *)image_ptr, 0, image_size);
-#elif defined (CFG_ENV_IS_IN_SPI)
-	printf("\n Copy %d bytes to Flash... \n", image_size);
-	rrc = raspi_erase_write((char *)image_ptr, 0, image_size);
-#else
-	ulong e_end = CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1;
-
-	flash_sect_protect(0, CFG_FLASH_BASE, e_end);
-	printf("\n Erase %s block from 0x%X to 0x%X\n", "U-Boot", CFG_FLASH_BASE, e_end);
-	flash_sect_erase(CFG_FLASH_BASE, e_end);
-	printf("\n Copy %d bytes to Flash... \n", image_size);
-	rrc = flash_write((uchar *)image_ptr, CFG_FLASH_BASE, image_size);
-	flash_sect_protect(1, CFG_FLASH_BASE, e_end);
-#endif
+	if (FlashType == '1') {
+		if ((size = mtk_nand_probe()) != (ulong)0) {
+			printf("nand probe fail\n");
+			while(1);
+		}
+		printf("\n Copy %d bytes to Flash... \n", image_size);
+		rrc = ranand_erase_write((char *)image_ptr, 0, image_size);
+	}
+//#elif defined (CFG_ENV_IS_IN_SPI)
+	if (FlashType == '2') {
+		if ((size = raspi_init()) == (ulong)-1) {
+			printf("ra_spi_init fail\n");
+			while(1);
+		}
+		printf("\n Copy %d bytes to Flash... \n", image_size);
+		rrc = raspi_erase_write((char *)image_ptr, 0, image_size);
+	}
+//#else
+//	ulong e_end = CFG_FLASH_BASE+CFG_BOOTLOADER_SIZE-1;
+//
+//	flash_sect_protect(0, CFG_FLASH_BASE, e_end);
+//	printf("\n Erase %s block from 0x%X to 0x%X\n", "U-Boot", CFG_FLASH_BASE, e_end);
+//	flash_sect_erase(CFG_FLASH_BASE, e_end);
+//	printf("\n Copy %d bytes to Flash... \n", image_size);
+//	rrc = flash_write((uchar *)image_ptr, CFG_FLASH_BASE, image_size);
+//	flash_sect_protect(1, CFG_FLASH_BASE, e_end);
+//#endif
 
 	if (rrc) {
 #if defined (CFG_ENV_IS_IN_NAND) || defined (CFG_ENV_IS_IN_SPI)
@@ -2334,7 +2340,16 @@ retry_uboot_tftp:
 				printf(" Operation terminated\n");
 				break;
 			}
-			setenv("bootfile", uboot_file);
+			printf(" Select Flash Type you want(1. Nand, 2. Nor):(1/2)\n");
+			FlashType = getc();
+			if (FlashType != '1' && FlashType != '2') {
+				printf(" Operation terminated\n");
+				break;
+			}
+			if (FlashType == '1')
+				setenv("bootfile", "uboot.img");
+			else
+				setenv("bootfile", "uboot.bin");
 			tftp_config(SEL_LOAD_BOOT_WRITE_FLASH, argv);
 			setenv("autostart", "no");
 

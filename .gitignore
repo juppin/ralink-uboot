@@ -1,16 +1,19 @@
 *.o
-uboot.bin
 *.map
 *.srec
 .depend
 *.swp
 *.swo
 *.a
-.menuconfig.log
-.config.old
-.config
 
-include/asm
-include/config.mk
-autoconf.h
-scripts/lxdialog/lxdialog
+/.menuconfig.log
+/.config.old
+/.config
+/.tmp_config
+/autoconf.h
+
+/scripts/lxdialog/lxdialog
+/tools/mkimage
+/uboot.bin
+/uboot.img
+/u-boot

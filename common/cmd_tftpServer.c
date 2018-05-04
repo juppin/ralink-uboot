@@ -7,6 +7,7 @@
 #include <spi_api.h>
 #include <nand_api.h>
 #include <malloc.h>
+#include <failsave.h>
 #include "../autoconf.h"
 
 #ifdef CFG_DIRECT_FLASH_TFTP
@@ -35,7 +36,6 @@ extern int do_reset(cmd_tbl_t *, int, int, char *[]);
 extern int verify_kernel_image(ulong, ulong *, ulong *, ulong *);
 extern int flash_kernel_image(ulong image_ptr, ulong image_size);
 extern int flash_kernel_image_from_usb(cmd_tbl_t *cmdtp);
-extern int reset_to_default(void);
 extern void perform_system_reset(void);
 
 #if (CONFIG_COMMANDS & CFG_CMD_TFTPSERVER)

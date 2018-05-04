@@ -7,6 +7,7 @@
 #include <net.h>
 #include <asm/addrspace.h>
 #include <rt_mmap.h>
+#include <cmd_rf.h>
 
 #undef DEBUG
 #define BIT(x)              ((1 << x))

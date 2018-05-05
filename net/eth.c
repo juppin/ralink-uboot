@@ -252,10 +252,23 @@ int eth_initialize(bd_t *bis)
 
 			//if flash is empty, use default mac address
 			if (memcmp(rt2880_gmac1_mac, empty_mac, 6) == 0)
-				eth_parse_enetaddr(CONFIG_ETHADDR, rt2880_gmac1_mac);
+				eth_parse_enetaddr(CONFIG_ETHADDR_DEFAULT, rt2880_gmac1_mac);
 
 			if (memcmp (rt2880_gmac1_mac, "\0\0\0\0\0\0", 6) == 0)
-				eth_parse_enetaddr(CONFIG_ETHADDR, rt2880_gmac1_mac);
+				eth_parse_enetaddr(CONFIG_ETHADDR_DEFAULT, rt2880_gmac1_mac);
+
+            /* try to set ethaddr in env (could only set once) */
+            if(!getenv("ethaddr")){
+                unsigned char ethaddr[sizeof(CONFIG_ETHADDR_DEFAULT)];
+                sprintf(ethaddr, "%02x:%02x:%02x:%02x:%02x:%02x",
+                        rt2880_gmac1_mac[0],
+                        rt2880_gmac1_mac[1],
+                        rt2880_gmac1_mac[2],
+                        rt2880_gmac1_mac[3],
+                        rt2880_gmac1_mac[4],
+                        rt2880_gmac1_mac[5]);
+                setenv("ethaddr", ethaddr);
+            }
 
 			memcpy(dev->enetaddr, rt2880_gmac1_mac, 6);
 

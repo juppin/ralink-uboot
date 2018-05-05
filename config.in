@@ -1617,3 +1617,8 @@ int  'USB #1 5V Power GPIO'	GPIO_USB_POWER		-1
 int  'USB #2 5V Power GPIO'	GPIO_USB_POWER2		-1
 int  'Reset iNIC GPIO'		GPIO_RST_INIC		-1
 
+##################################################################################################
+
+comment "Misc"
+
+bool 'Enable non-default commands' CONFIG_CMD_NONSTD

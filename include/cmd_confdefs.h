@@ -153,7 +153,19 @@
 
 /* Default configuration
  */
+#if !defined(CONFIG_CMD_NONSTD)
 #define CONFIG_CMD_DFL	(CFG_CMD_ALL & ~CFG_CMD_NONSTD)
+#else
+#define CONFIG_CMD_DFL  (CFG_CMD_ALL & \
+                                    ~(CFG_CMD_MMC | \
+                                    CFG_CMD_NFS | \
+                                    CFG_CMD_DATE | \
+                                    CFG_CMD_ELF | \
+                                    CFG_CMD_LOADS | \
+                                    CFG_CMD_HWFLOW | \
+                                    CFG_CMD_IRQ | \
+                                    CFG_CMD_CDP ))
+#endif /*  */
 #define CONFIG_COMMANDS (CONFIG_CMD_DFL)
 
 /* USB appliance */

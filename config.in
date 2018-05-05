@@ -1621,5 +1621,6 @@ int  'Reset iNIC GPIO'		GPIO_RST_INIC		-1
 
 comment "Misc"
 
+bool 'Enable auto complete'         CONFIG_AUTO_COMPLETE
 bool 'Enable non-default commands'  CONFIG_CMD_NONSTD
 bool 'Optimize for performnce'      CONFIG_PERFORMANCE

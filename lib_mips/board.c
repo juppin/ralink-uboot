@@ -933,6 +933,7 @@ void OperationSelect(void)
 #ifdef RALINK_UPGRADE_BY_SERIAL
 	printf("   %d: Load %s code then write to Flash via %s.\n", SEL_LOAD_BOOT_WRITE_FLASH_BY_SERIAL, "U-Boot", "Serial");
 #endif
+	printf("   %d: Load %s code to SDRAM via %s.\n", SEL_LOAD_BOOT_SDRAM, "U-Boot", "TFTP");
 	printf("   %d: Load %s code then write to Flash via %s.\n", SEL_LOAD_BOOT_WRITE_FLASH, "U-Boot", "TFTP");
 }
 
@@ -2315,6 +2316,10 @@ retry_kernel_serial:
 			setenv("autostart", "yes");
 			argc = 3;
 			do_tftpb(cmdtp, 0, argc, argv);
+			/* fallback for image without uImage header */
+			puts("## bootm failed -> trying go\n");
+			argc = 2;
+			do_go(cmdtp, 0, argc, argv);
 			break;
 
 		case '9':
